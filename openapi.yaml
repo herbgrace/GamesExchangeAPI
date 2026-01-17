@@ -1,0 +1,547 @@
+openapi: 3.0.0
+info:
+  description: An API to trade video games with other users.
+  title: Video Game Exchange API
+  version: 1.0.0
+servers:
+- url: https://localhost:7156
+paths:
+  /games:
+    get:
+      operationId: gamesGET
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Game"
+                type: array
+          description: A list of games
+      summary: Retrieve a list of all games in the exchange
+      x-eov-operation-handler: controllers/DefaultController
+    post:
+      operationId: gamesPOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GameCreate"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+          description: Game added successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/_games_post_400_response"
+          description: Invalid Game Details
+      summary: Add a new game to the exchange list
+      x-eov-operation-handler: controllers/DefaultController
+  /games/searchByName/{name}:
+    get:
+      operationId: gamesNameGET
+      parameters:
+      - explode: false
+        in: path
+        name: name
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+          description: Game details retrieved successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/_games__name__get_400_response"
+          description: Invalid name supplied
+      summary: Retrieve a game by name
+      x-eov-operation-handler: controllers/DefaultController
+  /games/{id}:
+    delete:
+      operationId: gamesIdDELETE
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "204":
+          description: Game deleted successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/_games__id__get_400_response"
+          description: Invalid ID supplied
+      summary: Remove a game from the exchange list by ID
+      x-eov-operation-handler: controllers/DefaultController
+    get:
+      operationId: gamesIdGET
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+          description: Game details retrieved successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/_games__id__get_400_response"
+          description: Invalid ID supplied
+      summary: Retrieve a game by ID
+      x-eov-operation-handler: controllers/DefaultController
+    patch:
+      operationId: gamesIdPATCH
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/_games__id__patch_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+          description: Game updated successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/_games__id__get_400_response"
+          description: Invalid ID supplied
+      summary: Update certain properties of a game by ID (Partial Update)
+      x-eov-operation-handler: controllers/DefaultController
+    put:
+      operationId: gamesIdPUT
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GameCreate"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+          description: Game updated successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/_games__id__get_400_response"
+          description: Invalid ID supplied
+      summary: Replace all properties of a game by ID (Full Update)
+      x-eov-operation-handler: controllers/DefaultController
+  /users:
+    get:
+      operationId: usersGET
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/User"
+                type: array
+          description: A list of users
+      summary: Retrieve a list of all users
+      x-eov-operation-handler: controllers/DefaultController
+    post:
+      operationId: usersPOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreate"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          description: User added successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/_users_post_400_response"
+          description: Invalid User Details
+      summary: Add a new user to the system
+      x-eov-operation-handler: controllers/DefaultController
+  /users/{id}:
+    get:
+      operationId: usersIdGET
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          description: User details retrieved successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/_users__id__get_400_response"
+          description: Invalid ID supplied
+      summary: Retrieve a user by ID
+      x-eov-operation-handler: controllers/DefaultController
+    delete:
+      operationId: usersIdDELETE
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "204":
+          description: User deleted successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/_games__id__get_400_response"
+          description: Invalid ID supplied
+      summary: Remove a user from the system by ID
+      x-eov-operation-handler: controllers/DefaultController
+    patch:
+      operationId: usersIdPATCH
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/_users__id__patch_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          description: User updated successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/_users__id__put_400_response"
+          description: Invalid User Information
+      summary: Update certain properties of a user by ID (Partial Update)
+      x-eov-operation-handler: controllers/DefaultController
+    put:
+      operationId: usersIdPUT
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreate"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+          description: User updated successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/_users__id__put_400_response"
+          description: Invalid User Information
+      summary: Update user by ID (Full Update)
+      x-eov-operation-handler: controllers/DefaultController
+components:
+  schemas:
+    Game:
+      example:
+        id: 1
+        name: Super Mario Bros.
+        publisher: Nintendo
+        releaseYear: 1985
+        releaseSystem: NES
+        condition: Mint
+        previousOwner: 1
+      properties:
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+        publisher:
+          type: string
+        releaseYear:
+          type: integer
+        releaseSystem:
+          type: string
+        condition:
+          enum:
+          - Mint
+          - Good
+          - Fair
+          - Poor
+          type: string
+        previousOwner:
+          type: integer
+      required:
+      - condition
+      - id
+      - name
+      - publisher
+      - releaseSystem
+      - releaseYear
+      type: object
+    User:
+      example:
+        id: 1
+        username: herbgrace
+        email: example@gmail.com
+        password: securepassword
+        address: "123 Main St, Midvale, UT"
+      properties:
+        id:
+          format: int64
+          type: integer
+        username:
+          type: string
+        email:
+          format: email
+          type: string
+        password:
+          format: password
+          type: string
+        address:
+          type: string
+      required:
+      - address
+      - email
+      - id
+      - password
+      - username
+      type: object
+    GameCreate:
+      example:
+        name: Super Mario Bros.
+        publisher: Nintendo
+        releaseYear: 1985
+        releaseSystem: NES
+        condition: Mint
+        previousOwner: 1
+      properties:
+        name:
+          type: string
+        publisher:
+          type: string
+        releaseYear:
+          type: integer
+        releaseSystem:
+          type: string
+        condition:
+          enum:
+          - Mint
+          - Good
+          - Fair
+          - Poor
+          type: string
+        previousOwner:
+          type: integer
+      required:
+      - condition
+      - name
+      - publisher
+      - releaseSystem
+      - releaseYear
+      type: object
+    UserCreate:
+      example:
+        username: herbgrace
+        email: example@gmail.com
+        password: securepassword
+        address: "123 Main St, Midvale, UT"
+      properties:
+        username:
+          type: string
+        email:
+          format: email
+          type: string
+        password:
+          format: password
+          type: string
+        address:
+          type: string
+      required:
+      - address
+      - email
+      - password
+      - username
+      type: object
+    _games_post_400_response:
+      example:
+        error: Invalid Game Details
+      properties:
+        error:
+          example: Invalid Game Details
+          type: string
+      type: object
+    _games__name__get_400_response:
+      example:
+        error: Invalid name supplied
+      properties:
+        error:
+          example: Invalid name supplied
+          type: string
+      type: object
+    _games__id__get_400_response:
+      example:
+        error: Invalid ID supplied
+      properties:
+        error:
+          example: Invalid ID supplied
+          type: string
+      type: object
+    _games__id__patch_request:
+      example:
+        name: Super Mario Bros.
+        publisher: Nintendo
+        releaseYear: 1985
+        releaseSystem: NES
+        condition: Mint
+        previousOwner: 1
+      properties:
+        name:
+          type: string
+        publisher:
+          type: string
+        releaseYear:
+          type: integer
+        releaseSystem:
+          type: string
+        condition:
+          enum:
+          - Mint
+          - Good
+          - Fair
+          - Poor
+          type: string
+        previousOwner:
+          type: integer
+      type: object
+    _users_post_400_response:
+      example:
+        error: Invalid User Details
+      properties:
+        error:
+          example: Invalid User Details
+          type: string
+      type: object
+    _users__id__get_400_response:
+      example:
+        error: Invalid ID supplied
+      properties:
+        error:
+          example: Invalid ID supplied
+          type: string
+      type: object
+    _users__id__put_400_response:
+      example:
+        error: Invalid User Information
+      properties:
+        error:
+          example: Invalid User Information
+          type: string
+      type: object
+    _users__id__patch_request:
+      example:
+        username: herbgrace
+        password: securepassword
+        address: "123 Main St, Midvale, UT"
+      properties:
+        username:
+          type: string
+        password:
+          format: password
+          type: string
+        address:
+          type: string
+      type: object

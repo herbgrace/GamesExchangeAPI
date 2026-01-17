@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
 const { DAL } = require('./DAL');
+const BASE_URI = 'http://localhost:7156';
 
 /**
 * Retrieve a list of all games in the exchange
@@ -11,6 +12,10 @@ const gamesGET = () => new Promise(
   async (resolve, reject) => {
     try {
       const games = await DAL.getAllGames();
+      for (let game of games) {
+        game.previousOwner = game.previousOwner ? `${BASE_URI}/users/${game.previousOwner}` : "None";
+        game.URI = `${BASE_URI}/games/${game.id}`;
+      }
       resolve(Service.successResponse(games));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -52,6 +57,7 @@ const gamesIdGET = ({ id }) => new Promise(
   async (resolve, reject) => {
     try {
       const game = await DAL.getGameById(id);
+      game.previousOwner = game.previousOwner ? `${BASE_URI}/users/${game.previousOwner}` : "None";
       resolve(Service.successResponse(game));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -72,6 +78,8 @@ const gamesIdPATCH = ({ id, body }) => new Promise(
   async (resolve, reject) => {
     try {
       const game = await DAL.partiallyUpdateGame(id, body);
+      game.previousOwner = game.previousOwner ? `${BASE_URI}/users/${game.previousOwner}` : "None";
+      game.newURI = `${BASE_URI}/games/${game.id}`;
       resolve(Service.successResponse(game));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -92,6 +100,8 @@ const gamesIdPUT = ({ id, body }) => new Promise(
   async (resolve, reject) => {
     try {
       const game = await DAL.fullyUpdateGame(id, body);
+      game.previousOwner = game.previousOwner ? `${BASE_URI}/users/${game.previousOwner}` : "None";
+      game.newURI = `${BASE_URI}/games/${game.id}`;
       resolve(Service.successResponse(game));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -111,6 +121,7 @@ const gamesNameGET = ({ name }) => new Promise(
   async (resolve, reject) => {
     try {
       const game = await DAL.getGameByName(name);
+      game.previousOwner = game.previousOwner ? `${BASE_URI}/users/${game.previousOwner}` : "None";
       resolve(Service.successResponse(game));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -130,6 +141,8 @@ const gamesPOST = ({ body }) => new Promise(
   async (resolve, reject) => {
     try {
       const game = await DAL.addNewGame(body);
+      game.previousOwner = game.previousOwner ? `${BASE_URI}/users/${game.previousOwner}` : "None";
+      game.URI = `${BASE_URI}/games/${game.id}`;
       resolve({
         code: 201,
         payload: game
@@ -151,6 +164,10 @@ const usersGET = () => new Promise(
   async (resolve, reject) => {
     try {
       const users = await DAL.getAllUsers();
+      for (let user of users) {
+        delete user.password;
+        user.URI = `${BASE_URI}/users/${user.id}`;
+      }
       resolve(Service.successResponse(users));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -170,6 +187,7 @@ const usersIdGET = ({ id }) => new Promise(
   async (resolve, reject) => {
     try {
       const user = await DAL.getUserById(id);
+      delete user.password;
       resolve(Service.successResponse(user));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -212,6 +230,8 @@ const usersIdPATCH = ({ id, body }) => new Promise(
   async (resolve, reject) => {
     try {
       const user = await DAL.partiallyUpdateUser(id, body);
+      delete user.password;
+      user.newURI = `${BASE_URI}/users/${user.id}`;
       resolve(Service.successResponse(user));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -232,6 +252,8 @@ const usersIdPUT = ({ id, body }) => new Promise(
   async (resolve, reject) => {
     try {
       const user = await DAL.fullyUpdateUser(id, body);
+      delete user.password;
+      user.newURI = `${BASE_URI}/users/${user.id}`;
       resolve(Service.successResponse(user));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -251,6 +273,8 @@ const usersPOST = ({ body }) => new Promise(
   async (resolve, reject) => {
     try {
       const user = await DAL.addNewUser(body);
+      delete user.password;
+      user.URI = `${BASE_URI}/users/${user.id}`;
       resolve({
         code: 201,
         payload: user

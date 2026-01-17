@@ -7,15 +7,12 @@ const connection = mysql.createConnection({
     database: 'GamesExchangeDB'
 });
 
-// ABOUT AI USAGE IN THIS FILE:
+// ABOUT AI USAGE IN THIS PROJECT:
 // Most of this file was written with the help of inline suggestions from VSC Copilot.
 // It's almost exactly what I would have done, just faster.
 // The only part I specifically asked it for help with was the partiallyUpdateGame/User functions
+// (This was the main file I worked on, the only other one I edited was DefaultService.js and openapi.yaml of course)
 
-// LIST OF THINGS TO DO(IN ORDER):
-// ADD DIRECTIONS TO RESPONSES TO APPEAL TO RMM LEVEL 3 (how exactly is TBD)
-// Instead of showing all previousOwner info, just show user URI
-// Show other URIs of what the user can do?
 exports.DAL = {
     getAllGames : async function() {
         try {

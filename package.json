@@ -1,5 +1,5 @@
 {
-  "name":  "video-game-exchange-api",
+  "name": "video-game-exchange-api",
   "version": "1.0.0",
   "description": "An API to trade video games with other users.",
   "main": "index.js",
@@ -22,6 +22,8 @@
     "express": "^4.16.4",
     "express-openapi-validator": "^4.13.8",
     "js-yaml": "^3.3.0",
+    "mysql2": "^3.16.1",
+    "nodemon": "^3.1.11",
     "ono": "^5.0.1",
     "openapi-sampler": "^1.0.0-beta.15",
     "swagger-ui-express": "^4.0.2",

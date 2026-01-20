@@ -1,10 +1,13 @@
 const mysql = require('mysql2');
-const connection = mysql.createConnection({
-    host: 'localhost',
-    port: 3306,
-    user: 'root',
-    password: 'dev123',
-    database: 'GamesExchangeDB'
+const pool = mysql.createPool({
+    host: process.env.DB_HOST || 'host.docker.internal',
+    port: process.env.DB_PORT || 3306,
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || 'dev123',
+    database: process.env.DB_NAME || 'GamesExchangeDB',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
 // ABOUT AI USAGE IN THIS PROJECT:
@@ -16,7 +19,7 @@ const connection = mysql.createConnection({
 exports.DAL = {
     getAllGames : async function() {
         try {
-            const [rows, fields] = await connection.promise().query('SELECT * FROM Games');
+            const [rows, fields] = await pool.promise().query('SELECT * FROM Games');
             return rows;
         } catch (error) {
             throw error;
@@ -28,7 +31,7 @@ exports.DAL = {
             throw new Error('ID is required');
         }
         try {
-            const [rows, fields] = await connection.promise().query(
+            const [rows, fields] = await pool.promise().query(
                 'SELECT * FROM Games WHERE id = ?',
                 [id]
             );
@@ -46,7 +49,7 @@ exports.DAL = {
             throw new Error('Name is required');
         }
         try {
-            const [rows, fields] = await connection.promise().query(
+            const [rows, fields] = await pool.promise().query(
                 'SELECT * FROM Games WHERE name = ?',
                 [name]
             );
@@ -75,7 +78,7 @@ exports.DAL = {
 
             // Validate previousOwner if provided
             if (game.previousOwner !== undefined) {
-                const [users] = await connection.promise().query(
+                const [users] = await pool.promise().query(
                     'SELECT id FROM Users WHERE id = ?',
                     [game.previousOwner]
                 );
@@ -99,7 +102,7 @@ exports.DAL = {
             const setClause = fields.map(field => `${field} = ?`).join(', ');
             
             
-            const result = await connection.promise().execute(
+            const result = await pool.promise().execute(
                 `UPDATE Games SET ${setClause} WHERE id = ?`,
                 values
             );
@@ -109,7 +112,7 @@ exports.DAL = {
             }
             
             // Fetch and return the updated game
-            const [rows] = await connection.promise().query(
+            const [rows] = await pool.promise().query(
                 'SELECT * FROM Games WHERE id = ?',
                 [id]
             );
@@ -131,7 +134,7 @@ exports.DAL = {
 
             // Validate previousOwner if provided
             if (previousOwner) {
-                const [users] = await connection.promise().query(
+                const [users] = await pool.promise().query(
                     'SELECT id FROM Users WHERE id = ?',
                     [previousOwner]
                 );
@@ -142,7 +145,7 @@ exports.DAL = {
                 previousOwner = null;
             }
 
-            const [result] = await connection.promise().execute(
+            const [result] = await pool.promise().execute(
                 'UPDATE Games SET name = ?, publisher = ?, releaseYear = ?, releaseSystem = ?, `condition` = ?, previousOwner = ? WHERE id = ?',
                 [name, publisher, releaseYear, releaseSystem, condition, previousOwner, id]
             );
@@ -150,7 +153,7 @@ exports.DAL = {
                 throw new Error('Game not found');
             }
             // Fetch the updated game to include the email in response
-            const [rows] = await connection.promise().query(
+            const [rows] = await pool.promise().query(
                 'SELECT * FROM Games WHERE id = ?',
                 [id]
             );
@@ -172,7 +175,7 @@ exports.DAL = {
             
             // Validate previousOwner if provided
             if (previousOwner) {
-                const [users] = await connection.promise().query(
+                const [users] = await pool.promise().query(
                     'SELECT id FROM Users WHERE id = ?',
                     [previousOwner]
                 );
@@ -183,7 +186,7 @@ exports.DAL = {
                 previousOwner = null;
             }
             
-            const [result] = await connection.promise().execute(
+            const [result] = await pool.promise().execute(
                 'INSERT INTO Games (name, publisher, releaseYear, releaseSystem, `condition`, previousOwner) VALUES (?, ?, ?, ?, ?, ?)',
                 [name, publisher, releaseYear, releaseSystem, condition, previousOwner]
             );
@@ -207,7 +210,7 @@ exports.DAL = {
             throw new Error('ID is required');
         }
         try {
-            const [result] = await connection.promise().execute(
+            const [result] = await pool.promise().execute(
                 'DELETE FROM Games WHERE id = ?',
                 [id]
             );
@@ -219,7 +222,7 @@ exports.DAL = {
 
     getAllUsers : async function() {
         try {
-            const [rows, fields] = await connection.promise().query('SELECT * FROM Users');
+            const [rows, fields] = await pool.promise().query('SELECT * FROM Users');
             return rows;
         } catch (error) {
             throw error;
@@ -231,7 +234,7 @@ exports.DAL = {
             throw new Error('ID is required');
         }
         try {
-            const [rows, fields] = await connection.promise().query(
+            const [rows, fields] = await pool.promise().query(
                 'SELECT * FROM Users WHERE id = ?',
                 [id]
             );
@@ -253,7 +256,7 @@ exports.DAL = {
             if (!username || !email || !password || !address) {
                 throw new Error('username, email, password, and address are required');
             }
-            const [result] = await connection.promise().execute(
+            const [result] = await pool.promise().execute(
                 'INSERT INTO Users (username, email, password, address) VALUES (?, ?, ?, ?)',
                 [username, email, password, address]
             );
@@ -279,7 +282,7 @@ exports.DAL = {
             if (!username || !password || !address) {
                 throw new Error('username, password and address are required');
             }
-            const [result] = await connection.promise().execute(
+            const [result] = await pool.promise().execute(
                 'UPDATE Users SET username = ?, password = ?, address = ? WHERE id = ?',
                 [username, password, address, id]
             );
@@ -287,7 +290,7 @@ exports.DAL = {
                 throw new Error('User not found');
             }
             // Fetch the updated user to include the email in response
-            const [rows] = await connection.promise().query(
+            const [rows] = await pool.promise().query(
                 'SELECT * FROM Users WHERE id = ?',
                 [id]
             );
@@ -320,7 +323,7 @@ exports.DAL = {
             
             const setClause = fields.map(field => `${field} = ?`).join(', ');
             
-            const result = await connection.promise().execute(
+            const result = await pool.promise().execute(
                 `UPDATE Users SET ${setClause} WHERE id = ?`,
                 values
             );
@@ -330,7 +333,7 @@ exports.DAL = {
             }
             
             // Fetch and return the updated user
-            const [rows] = await connection.promise().query(
+            const [rows] = await pool.promise().query(
                 'SELECT * FROM Users WHERE id = ?',
                 [id]
             );
@@ -345,7 +348,7 @@ exports.DAL = {
             if (!id) {
                 throw new Error('ID is required');
             }
-            await connection.promise().execute(
+            await pool.promise().execute(
                 'DELETE FROM Users WHERE id = ?',
                 [id]
             );

@@ -313,6 +313,68 @@ const usersPOST = ({ body }) => new Promise(
     }
   },
 );
+/**
+* Retrieve an offer by ID
+*
+* id Long 
+* returns Offer
+* */
+const offersIdGET = ({ id }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      resolve(Service.successResponse({
+        id,
+      }));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
+* Create a new offer
+*
+* id Long 
+* offerUpdate OfferUpdate 
+* returns Offer
+* */
+const offersIdPATCH = ({ id, offerUpdate }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      resolve(Service.successResponse({
+        id,
+        offerUpdate,
+      }));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
+/**
+* Retrieve an offer by ID
+*
+* offerCreate OfferCreate 
+* returns Offer
+* */
+const offersCreatePOST = ({ offerCreate }) => new Promise(
+  async (resolve, reject) => {
+    try {
+      resolve(Service.successResponse({
+        offerCreate,
+      }));
+    } catch (e) {
+      reject(Service.rejectResponse(
+        e.message || 'Invalid input',
+        e.status || 405,
+      ));
+    }
+  },
+);
 
 module.exports = {
   gamesGET,
@@ -328,4 +390,7 @@ module.exports = {
   usersIdPATCH,
   usersIdPUT,
   usersPOST,
+  offersIdGET,
+  offersIdPATCH,
+  offersCreatePOST,
 };

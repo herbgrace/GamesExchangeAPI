@@ -36,6 +36,18 @@ const gamesPOST = async (request, response) => {
   await Controller.handleRequest(request, response, service.gamesPOST);
 };
 
+const offersCreatePOST = async (request, response) => {
+  await Controller.handleRequest(request, response, service.offersCreatePOST);
+};
+
+const offersIdGET = async (request, response) => {
+  await Controller.handleRequest(request, response, service.offersIdGET);
+};
+
+const offersIdPATCH = async (request, response) => {
+  await Controller.handleRequest(request, response, service.offersIdPATCH);
+};
+
 const usersGET = async (request, response) => {
   await Controller.handleRequest(request, response, service.usersGET);
 };
@@ -69,6 +81,9 @@ module.exports = {
   gamesIdPUT,
   gamesNameGET,
   gamesPOST,
+  offersCreatePOST,
+  offersIdGET,
+  offersIdPATCH,
   usersGET,
   usersIdDELETE,
   usersIdGET,

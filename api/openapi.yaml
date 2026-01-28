@@ -332,6 +332,89 @@ paths:
           description: Invalid User Information
       summary: Update user by ID (Full Update)
       x-eov-operation-handler: controllers/DefaultController
+  /offers:
+    post:
+      operationId: offersCreatePOST
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OfferCreate"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Offer"
+          description: Offer created successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid ID supplied
+      summary: Retrieve an offer by ID
+      x-eov-operation-handler: controllers/DefaultController
+  /offers/{id}:
+    get:
+      operationId: offersIdGET
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Offer"
+          description: Offer details retrieved successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid ID supplied
+      summary: Retrieve an offer by ID
+      x-eov-operation-handler: controllers/DefaultController
+    patch:
+      operationId: offersIdPATCH
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: int64
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OfferUpdate"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Offer"
+          description: Offer updated successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Invalid ID supplied
+      summary: Create a new offer
+      x-eov-operation-handler: controllers/DefaultController
 components:
   schemas:
     Game:
@@ -455,6 +538,52 @@ components:
       - email
       - password
       - username
+      type: object
+    Offer:
+      example:
+        id: 1
+        gameOffered: 2
+        gameRequested: 3
+        status: Pending
+      properties:
+        id:
+          format: int64
+          type: integer
+        gameOffered:
+          type: integer
+        gameRequested:
+          type: integer
+        status:
+          enum:
+          - Pending
+          - Accepted
+          - Rejected
+          type: string
+    OfferCreate:
+      example:
+        gameOffered: 2
+        gameRequested: 3
+      properties:
+        gameOffered:
+          type: integer
+        gameRequested:
+          type: integer
+      required:
+      - gameOffered
+      - gameRequested
+      type: object
+    OfferUpdate:
+      example:
+        status: Accepted
+      properties:
+        status:
+          enum:
+          - Pending
+          - Accepted
+          - Rejected
+          type: string
+      required:
+      - status
       type: object
     _games_post_400_response:
       example:

@@ -24,3 +24,6 @@
 
 ./services/DefaultServiceBACKUP.js
 expressServer.js
+openapi.yaml
+package.json
+package-lock.json

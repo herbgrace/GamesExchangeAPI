@@ -322,9 +322,11 @@ const usersPOST = ({ body }) => new Promise(
 const offersIdGET = ({ id }) => new Promise(
   async (resolve, reject) => {
     try {
-      resolve(Service.successResponse({
-        id,
-      }));
+      const offer = await DAL.getOfferById(id);
+      offer.gameRequested = `${BASE_URI}/games/${offer.gameRequested}`;
+      offer.gameOffered = `${BASE_URI}/games/${offer.gameOffered}`;
+      console.log(offer);
+      resolve(Service.successResponse(offer));
     } catch (e) {
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
@@ -340,13 +342,38 @@ const offersIdGET = ({ id }) => new Promise(
 * offerUpdate OfferUpdate 
 * returns Offer
 * */
-const offersIdPATCH = ({ id, offerUpdate }) => new Promise(
+const offersIdPATCH = ({ id, body }) => new Promise(
   async (resolve, reject) => {
     try {
-      resolve(Service.successResponse({
-        id,
-        offerUpdate,
-      }));
+      if (body.status == "Accepted") {
+        const offer = await DAL.updateOffer(id, body);
+        const gameRequested = await DAL.getGameById(offer.gameRequested);
+        const gameOffered =  await DAL.getGameById(offer.gameOffered);
+
+        // Swap the owners of each game
+        await DAL.partiallyUpdateGame(gameRequested.id, { previousOwner: gameOffered.previousOwner });
+        await DAL.partiallyUpdateGame(gameOffered.id, { previousOwner: gameRequested.previousOwner });
+
+        offer.gameRequested = `${BASE_URI}/games/${offer.gameRequested}`;
+        offer.gameOffered = `${BASE_URI}/games/${offer.gameOffered}`;
+        console.log(offer);
+        resolve(Service.successResponse(offer));
+
+      } else if (body.status == "Rejected") {
+        const offer = await DAL.updateOffer(id, body);
+
+        offer.gameRequested = `${BASE_URI}/games/${offer.gameRequested}`;
+        offer.gameOffered = `${BASE_URI}/games/${offer.gameOffered}`;
+
+        console.log(offer);
+        resolve(Service.successResponse(offer));
+
+      } else {
+        reject(Service.rejectResponse(
+          'Offer status must be either Accepted or Rejected',
+          405,
+        ));
+      }
     } catch (e) {
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
@@ -361,12 +388,20 @@ const offersIdPATCH = ({ id, offerUpdate }) => new Promise(
 * offerCreate OfferCreate 
 * returns Offer
 * */
-const offersCreatePOST = ({ offerCreate }) => new Promise(
+const offersCreatePOST = ({ body }) => new Promise(
   async (resolve, reject) => {
     try {
-      resolve(Service.successResponse({
-        offerCreate,
-      }));
+      const offer = await DAL.addNewOffer(body);
+      
+      offer.gameRequested = `${BASE_URI}/games/${body.gameRequested}`;
+      offer.gameOffered = `${BASE_URI}/games/${body.gameOffered}`;
+      offer.status = "Pending";
+      offer.URI = `${BASE_URI}/offers/${offer.id}`;
+      console.log(offer);
+      resolve({
+        code: 201,
+        payload: offer
+    });
     } catch (e) {
       reject(Service.rejectResponse(
         e.message || 'Invalid input',

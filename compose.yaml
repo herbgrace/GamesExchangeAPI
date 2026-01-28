@@ -8,7 +8,7 @@
 # database or a cache. For examples, see the Awesome Compose repository:
 # https://github.com/docker/awesome-compose
 services:
-  server:
+  api:
     container_name: VideoGameApi
     environment:
       - DB_PORT=3306
@@ -21,7 +21,7 @@ services:
       - 7156:7156
     networks:
       - distributed_network
-  server2:
+  api2:
     container_name: VideoGameApi2
     environment:
       - DB_PORT=3306
@@ -41,8 +41,8 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - server
-      - server2
+      - api
+      - api2
     networks:
       - distributed_network
 

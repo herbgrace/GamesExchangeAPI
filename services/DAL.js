@@ -356,5 +356,68 @@ exports.DAL = {
         } catch (error) {
             throw error;
         }
+    },
+
+    getOfferById : async function(id) {
+        try {
+            if (!id) {
+                throw new Error('ID is required');
+            }
+            const [rows] = await pool.promise().query(
+                'SELECT * FROM Offers WHERE id = ?',
+                [id]
+            );
+            return rows[0];
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    addNewOffer : async function(offer) {
+        try {
+            if (!offer) {
+                throw new Error('Offer data is required');
+            }
+            const { gameRequested, gameOffered } = offer;
+            if (!gameRequested || !gameOffered) {
+                throw new Error('gameRequested and gameOffered are required');
+            }
+            const [result] = await pool.promise().execute(
+                'INSERT INTO Offers (gameRequested, gameOffered, status) VALUES (?, ?, ?)',
+                [gameRequested, gameOffered, 'Pending']
+            );
+            // Return the newly inserted user with the generated ID
+            return {
+                id: result.insertId,
+                gameRequested,
+                gameOffered
+            };
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    updateOffer : async function(id, offer) {
+        try {
+            if (!offer || !id || !offer.status) {
+                throw new Error('Offer data and ID are required');
+            }
+            const { status } = offer;
+            const [result] = await pool.promise().execute(
+                'UPDATE Offers SET status = ? WHERE id = ?',
+                [status, id]
+            );
+            if (result.affectedRows === 0) {
+                throw new Error('Offer not found');
+            }
+            // Fetch the updated offer to include in response
+            const [rows] = await pool.promise().query(
+                'SELECT * FROM Offers WHERE id = ?',
+                [id]
+            );
+            return rows[0];
+        } catch (error) {
+            throw error;
+        }
     }
 }

@@ -578,7 +578,6 @@ components:
       properties:
         status:
           enum:
-          - Pending
           - Accepted
           - Rejected
           type: string

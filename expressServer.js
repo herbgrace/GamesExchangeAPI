@@ -27,6 +27,14 @@ class ExpressServer {
 
   setupMiddleware() {
     // this.setupAllowedMedia();
+    // Log all incoming requests
+    this.app.use((req, res, next) => {
+      logger.info(`${req.method} ${req.path}`, { 
+        remoteAddr: req.ip,
+        userAgent: req.get('user-agent')
+      });
+      next();
+    });
     this.app.use(cors());
     this.app.use(bodyParser.json({ limit: '14MB' }));
     this.app.use(express.json());

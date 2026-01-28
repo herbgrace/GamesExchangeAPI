@@ -17,13 +17,9 @@ FROM node:${NODE_VERSION}-alpine
 
 # Use production node environment by default.
 # Added API specific environment variables.
-ENV NODE_ENV production
+ENV NODE_ENV development
 
 ENV DB_HOST host.docker.internal
-ENV DB_PORT 3306
-ENV DB_USER root
-ENV DB_PASSWORD dev123
-ENV DB_NAME GamesExchangeDB
 
 WORKDIR /usr/src/app
 

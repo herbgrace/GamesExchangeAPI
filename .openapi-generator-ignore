@@ -22,7 +22,7 @@
 # Then explicitly reverse the ignore rule for a single file:
 #!docs/README.md
 
-./services/DefaultServiceBACKUP.js
+./backups/
 expressServer.js
 openapi.yaml
 package.json

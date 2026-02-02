@@ -322,9 +322,9 @@ const usersPOST = ({ body }) => new Promise(
 const offersIdGET = ({ id }) => new Promise(
   async (resolve, reject) => {
     try {
-      const offer = await DAL.getOfferById(id);
-      offer.gameRequested = `${BASE_URI}/games/${offer.gameRequested}`;
-      offer.gameOffered = `${BASE_URI}/games/${offer.gameOffered}`;
+      let offer = await DAL.getOfferById(id);
+    
+      offer = formatOffer(offer);
       console.log(offer);
       resolve(Service.successResponse(offer));
     } catch (e) {
@@ -346,7 +346,7 @@ const offersIdPATCH = ({ id, body }) => new Promise(
   async (resolve, reject) => {
     try {
       if (body.status == "Accepted") {
-        const offer = await DAL.updateOffer(id, body);
+        let offer = await DAL.updateOffer(id, body);
         const gameRequested = await DAL.getGameById(offer.gameRequested);
         const gameOffered =  await DAL.getGameById(offer.gameOffered);
 
@@ -354,16 +354,13 @@ const offersIdPATCH = ({ id, body }) => new Promise(
         await DAL.partiallyUpdateGame(gameRequested.id, { previousOwner: gameOffered.previousOwner });
         await DAL.partiallyUpdateGame(gameOffered.id, { previousOwner: gameRequested.previousOwner });
 
-        offer.gameRequested = `${BASE_URI}/games/${offer.gameRequested}`;
-        offer.gameOffered = `${BASE_URI}/games/${offer.gameOffered}`;
+        offer = formatOffer(offer);
         console.log(offer);
         resolve(Service.successResponse(offer));
 
       } else if (body.status == "Rejected") {
-        const offer = await DAL.updateOffer(id, body);
-
-        offer.gameRequested = `${BASE_URI}/games/${offer.gameRequested}`;
-        offer.gameOffered = `${BASE_URI}/games/${offer.gameOffered}`;
+        let offer = await DAL.updateOffer(id, body);
+        offer = formatOffer(offer);
 
         console.log(offer);
         resolve(Service.successResponse(offer));
@@ -391,11 +388,9 @@ const offersIdPATCH = ({ id, body }) => new Promise(
 const offersCreatePOST = ({ body }) => new Promise(
   async (resolve, reject) => {
     try {
-      const offer = await DAL.addNewOffer(body);
+      let offer = await DAL.addNewOffer(body);
       
-      offer.gameRequested = `${BASE_URI}/games/${body.gameRequested}`;
-      offer.gameOffered = `${BASE_URI}/games/${body.gameOffered}`;
-      offer.status = "Pending";
+      offer = formatOffer(offer);
       offer.URI = `${BASE_URI}/offers/${offer.id}`;
       console.log(offer);
       resolve({
@@ -410,6 +405,14 @@ const offersCreatePOST = ({ body }) => new Promise(
     }
   },
 );
+
+const formatOffer = (offer) => {
+  offer.gameRequested = `${BASE_URI}/games/${offer.gameRequested}`;
+  offer.requestedOwner = `${BASE_URI}/users/${offer.requestedOwner}`;
+  offer.gameOffered = `${BASE_URI}/games/${offer.gameOffered}`;
+  offer.offeredOwner = `${BASE_URI}/users/${offer.offeredOwner}`;
+  return offer;
+}
 
 module.exports = {
   gamesGET,

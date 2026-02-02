@@ -382,15 +382,20 @@ exports.DAL = {
             if (!gameRequested || !gameOffered) {
                 throw new Error('gameRequested and gameOffered are required');
             }
+            const requestedOwnerId = (await this.getGameById(gameRequested)).previousOwner;
+            const offeredOwnerId = (await this.getGameById(gameOffered)).previousOwner;
             const [result] = await pool.promise().execute(
-                'INSERT INTO Offers (gameRequested, gameOffered, status) VALUES (?, ?, ?)',
-                [gameRequested, gameOffered, 'Pending']
+                'INSERT INTO Offers (gameRequested, gameOffered, requestedOwner, offeredOwner, status) VALUES (?, ?, ?, ?, ?)',
+                [gameRequested, gameOffered, requestedOwnerId, offeredOwnerId, 'Pending']
             );
             // Return the newly inserted user with the generated ID
             return {
                 id: result.insertId,
                 gameRequested,
-                gameOffered
+                requestedOwner: requestedOwnerId,
+                gameOffered,
+                offeredOwner: offeredOwnerId,
+                status: 'Pending'
             };
         } catch (error) {
             throw error;
@@ -403,6 +408,11 @@ exports.DAL = {
                 throw new Error('Offer data and ID are required');
             }
             const { status } = offer;
+            const currentOffer = await this.getOfferById(id);
+            if (currentOffer.status !== "Pending") {
+                throw new Error('Only pending offers can be updated');
+            }
+
             const [result] = await pool.promise().execute(
                 'UPDATE Offers SET status = ? WHERE id = ?',
                 [status, id]

@@ -25,11 +25,15 @@ CREATE TABLE IF NOT EXISTS Games (
 
 CREATE TABLE IF NOT EXISTS Offers (
 	id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    requestedOwner BIGINT,
+    offeredOwner BIGINT,
 	gameRequested BIGINT,
 	gameOffered BIGINT,
 	`status` ENUM('Pending', 'Accepted', 'Rejected') DEFAULT 'Pending',
 	FOREIGN KEY (gameRequested) REFERENCES `Games`(id) ON DELETE CASCADE,
-	FOREIGN KEY (gameOffered) REFERENCES `Games`(id) ON DELETE CASCADE
+	FOREIGN KEY (gameOffered) REFERENCES `Games`(id) ON DELETE CASCADE,
+    FOREIGN KEY (requestedOwner) REFERENCES `Users`(id) ON DELETE CASCADE,
+    FOREIGN KEY (offeredOwner) REFERENCES `Users`(id) ON DELETE CASCADE
 );
 
 INSERT INTO Users (username, email, password, address) VALUES 
@@ -40,5 +44,5 @@ INSERT INTO Games (`name`, publisher, releaseYear, releaseSystem, `condition`, p
 ("Super Mario Bros.", "Nintendo", 1985, "NES", "Good", 1),
 ("Contra", "Konami", 1988, "NES", "Fair", 2);
 
-INSERT INTO Offers (gameRequested, gameOffered) VALUES
-(1, 2);
+INSERT INTO Offers (gameRequested, requestedOwner, gameOffered, offeredOwner) VALUES
+(1, 1, 2, 2);

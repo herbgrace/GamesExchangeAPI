@@ -378,12 +378,10 @@ exports.DAL = {
             if (!offer) {
                 throw new Error('Offer data is required');
             }
-            const { gameRequested, gameOffered } = offer;
-            if (!gameRequested || !gameOffered) {
-                throw new Error('gameRequested and gameOffered are required');
+            const { gameRequested, gameOffered, requestedOwnerId, offeredOwnerId } = offer;
+            if (!gameRequested || !gameOffered || !requestedOwnerId || !offeredOwnerId) {
+                throw new Error('gameRequested, gameOffered, requestedOwnerId, and offeredOwnerId are required');
             }
-            const requestedOwnerId = (await this.getGameById(gameRequested)).previousOwner;
-            const offeredOwnerId = (await this.getGameById(gameOffered)).previousOwner;
             const [result] = await pool.promise().execute(
                 'INSERT INTO Offers (gameRequested, gameOffered, requestedOwner, offeredOwner, status) VALUES (?, ?, ?, ?, ?)',
                 [gameRequested, gameOffered, requestedOwnerId, offeredOwnerId, 'Pending']

@@ -1,6 +1,19 @@
 /* eslint-disable no-unused-vars */
 const Service = require('./Service');
 const { DAL } = require('./DAL');
+
+const { Kafka } = require('kafkajs');
+const kafka = new Kafka({
+  clientId: 'video-game-exchange-web-server',
+  brokers: [`${process.env.KAFKA_HOST || "kafka-broker"}:${process.env.KAFKA_PORT || "9092"}`]
+});
+const kafkaClient = kafka.producer();
+kafkaClient.connect().then(() => {
+  console.log("Kafka client connected");
+}).catch((error) => {
+  console.error("Error connecting Kafka client:", error);
+}); 
+
 const BASE_URI = 'http://localhost:8080';
 
 /**
@@ -253,6 +266,13 @@ const usersIdPATCH = ({ id, body }) => new Promise(
       delete user.password;
       user.newURI = `${BASE_URI}/users/${user.id}`;
       console.log(user);
+
+      kafkaClient.send({
+        topic: 'email-notifications',
+        messages: [
+          { value: `Password Updated- Email:${user.email}` },
+        ],
+      });
       resolve(Service.successResponse(user));
     } catch (e) {
       console.error(e);
@@ -277,6 +297,13 @@ const usersIdPUT = ({ id, body }) => new Promise(
       delete user.password;
       user.newURI = `${BASE_URI}/users/${user.id}`;
       console.log(user);
+
+      kafkaClient.send({
+        topic: 'email-notifications',
+        messages: [
+          { value: `Password Updated- Email:${user.email}` },
+        ],
+      });
       resolve(Service.successResponse(user));
     } catch (e) {
       console.error(e);
@@ -354,15 +381,35 @@ const offersIdPATCH = ({ id, body }) => new Promise(
         await DAL.partiallyUpdateGame(gameRequested.id, { previousOwner: gameOffered.previousOwner });
         await DAL.partiallyUpdateGame(gameOffered.id, { previousOwner: gameRequested.previousOwner });
 
+        const requestedOwner = await DAL.getUserById(offer.requestedOwner);
+        const offeredOwner = await DAL.getUserById(offer.offeredOwner);
+
         offer = formatOffer(offer);
         console.log(offer);
+
+        kafkaClient.send({
+          topic: 'email-notifications',
+          messages: [
+            { value: `Offer Accepted- RequestedEmail:${requestedOwner.email}, OffererEmail:${offeredOwner.email}` },
+          ],
+        });
         resolve(Service.successResponse(offer));
 
       } else if (body.status == "Rejected") {
         let offer = await DAL.updateOffer(id, body);
+
+        const requestedOwner = await DAL.getUserById(offer.requestedOwner);
+        const offeredOwner = await DAL.getUserById(offer.offeredOwner);
         offer = formatOffer(offer);
 
         console.log(offer);
+
+        kafkaClient.send({
+          topic: 'email-notifications',
+          messages: [
+            { value: `Offer Rejected- RequestedEmail:${requestedOwner.email}, OffererEmail:${offeredOwner.email}` },
+          ],
+        });
         resolve(Service.successResponse(offer));
 
       } else {
@@ -388,11 +435,22 @@ const offersIdPATCH = ({ id, body }) => new Promise(
 const offersCreatePOST = ({ body }) => new Promise(
   async (resolve, reject) => {
     try {
+      body.requestedOwnerId = (await DAL.getGameById(body.gameRequested)).previousOwner;
+      const requestedOwner = await DAL.getUserById(body.requestedOwnerId);
+      body.offeredOwnerId = (await DAL.getGameById(body.gameOffered)).previousOwner;
+      const offeredOwner = await DAL.getUserById(body.offeredOwnerId);
       let offer = await DAL.addNewOffer(body);
       
       offer = formatOffer(offer);
       offer.URI = `${BASE_URI}/offers/${offer.id}`;
       console.log(offer);
+
+      kafkaClient.send({
+        topic: 'email-notifications',
+        messages: [
+          { value: `New Offer Created- RequestedEmail:${requestedOwner.email}, OffererEmail:${offeredOwner.email}` },
+        ],
+      });
       resolve({
         code: 201,
         payload: offer

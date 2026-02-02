@@ -19,8 +19,6 @@ FROM node:${NODE_VERSION}-alpine
 # Added API specific environment variables.
 ENV NODE_ENV development
 
-ENV DB_HOST host.docker.internal
-
 WORKDIR /usr/src/app
 
 # Copy package files first.

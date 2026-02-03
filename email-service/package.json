@@ -1,0 +1,19 @@
+{
+  "name": "email-service",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "EmailSender.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node EmailSender.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sesv2": "^3.982.0",
+    "dotenv": "^17.2.3",
+    "kafkajs": "^2.2.4",
+    "nodemailer": "^7.0.13"
+  }
+}

@@ -37,8 +37,8 @@ CREATE TABLE IF NOT EXISTS Offers (
 );
 
 INSERT INTO Users (username, email, password, address) VALUES 
-("Test Username", "example@gmail.com", "AwesomePassword", "123 Main St. USA"),
-("Another User", "sayWHAT@yahoo.com", "Secure", "Something something st.");
+("Test Username", "thelen.alexander05@gmail.com", "AwesomePassword", "123 Main St. USA"),
+("Another User", "athelen@student.neumont.edu", "Secure", "Something something st.");
 
 INSERT INTO Games (`name`, publisher, releaseYear, releaseSystem, `condition`, previousOwner) VALUES
 ("Super Mario Bros.", "Nintendo", 1985, "NES", "Good", 1),

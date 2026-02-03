@@ -390,13 +390,15 @@ const offersIdPATCH = ({ id, body }) => new Promise(
         kafkaClient.send({
           topic: 'email-notifications',
           messages: [
-            { value: `Offer Accepted- RequestedEmail:${requestedOwner.email}, OffererEmail:${offeredOwner.email}` },
+            { value: `Offer Accepted- RequestedEmail:${requestedOwner.email}, OffererEmail:${offeredOwner.email}, GameRequested:${gameRequested.name}, GameOffered:${gameOffered.name}` },
           ],
         });
         resolve(Service.successResponse(offer));
 
       } else if (body.status == "Rejected") {
         let offer = await DAL.updateOffer(id, body);
+        const gameRequested = await DAL.getGameById(offer.gameRequested);
+        const gameOffered =  await DAL.getGameById(offer.gameOffered);
 
         const requestedOwner = await DAL.getUserById(offer.requestedOwner);
         const offeredOwner = await DAL.getUserById(offer.offeredOwner);
@@ -407,7 +409,7 @@ const offersIdPATCH = ({ id, body }) => new Promise(
         kafkaClient.send({
           topic: 'email-notifications',
           messages: [
-            { value: `Offer Rejected- RequestedEmail:${requestedOwner.email}, OffererEmail:${offeredOwner.email}` },
+            { value: `Offer Rejected- RequestedEmail:${requestedOwner.email}, OffererEmail:${offeredOwner.email}, GameRequested:${gameRequested.name}, GameOffered:${gameOffered.name}` },
           ],
         });
         resolve(Service.successResponse(offer));
@@ -435,9 +437,12 @@ const offersIdPATCH = ({ id, body }) => new Promise(
 const offersCreatePOST = ({ body }) => new Promise(
   async (resolve, reject) => {
     try {
-      body.requestedOwnerId = (await DAL.getGameById(body.gameRequested)).previousOwner;
+      const requestedGame = await DAL.getGameById(body.gameRequested);
+      body.requestedOwnerId = requestedGame.previousOwner;
       const requestedOwner = await DAL.getUserById(body.requestedOwnerId);
-      body.offeredOwnerId = (await DAL.getGameById(body.gameOffered)).previousOwner;
+
+      const offeredGame = await DAL.getGameById(body.gameOffered);
+      body.offeredOwnerId = offeredGame.previousOwner;
       const offeredOwner = await DAL.getUserById(body.offeredOwnerId);
       let offer = await DAL.addNewOffer(body);
       
@@ -448,7 +453,7 @@ const offersCreatePOST = ({ body }) => new Promise(
       kafkaClient.send({
         topic: 'email-notifications',
         messages: [
-          { value: `New Offer Created- RequestedEmail:${requestedOwner.email}, OffererEmail:${offeredOwner.email}` },
+          { value: `Offer Created- RequestedEmail:${requestedOwner.email}, OffererEmail:${offeredOwner.email}, GameRequested:${requestedGame.name}, GameOffered:${offeredGame.name}` },
         ],
       });
       resolve({

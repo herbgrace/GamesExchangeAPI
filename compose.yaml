@@ -76,8 +76,21 @@ services:
 # Then I had issues with getting the messages to appear in the consumer.
 # I caved and used Gemini to help me figure it out since documentation/tinkering can only get me so far apparently.
 # It was all because of the KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR variable being missing...
-  
-  # email-service:
+
+  email-service:
+    build:
+      context: ./email-service
+    container_name: EmailService
+    environment:
+      - KAFKA_HOST=kafka-broker
+      - KAFKA_PORT=9092
+    depends_on:
+      - kafka
+      - api
+    networks:
+      - distributed_network
+    env_file:
+      - ./email-service/credentials.env
 
 networks:
   distributed_network:

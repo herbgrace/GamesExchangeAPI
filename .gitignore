@@ -2,3 +2,5 @@ node_modules
 error.log
 combined.log
 kafka
+email-service/node_modules
+email-service/credentials.env

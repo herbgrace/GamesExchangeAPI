@@ -1,15 +1,6 @@
-const actuallySendEmails = process.env.ACTUALLY_SEND_EMAILS == "true";
-
+const { DAL } = require("./DAL")
 const nodemailer = require('nodemailer');
-const { SESv2Client, SendEmailCommand } = require("@aws-sdk/client-sesv2");
-const sesClient = new SESv2Client({ region: "us-east-1" });
-
-const transporter = actuallySendEmails ? 
-nodemailer.createTransport({
-    SES: { sesClient, SendEmailCommand }
-})
-:
-nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
     host: "smtp.ethereal.email",
     port: 587,
     secure: false, // Use true for port 465, false for port 587
@@ -31,36 +22,20 @@ const kafka = new Kafka({
 });
 const kafkaConsumer = kafka.consumer({ groupId: 'email-notification-consumers' });
 kafkaConsumer.connect().then(() => console.log('Email Service Kafka Consumer connected'));
-kafkaConsumer.subscribe({ topic: 'email-notifications', fromBeginning: false });
+kafkaConsumer.subscribe({ topic: 'offer-created', fromBeginning: false });
+kafkaConsumer.subscribe({ topic: 'offer-accepted', fromBeginning: false });
+kafkaConsumer.subscribe({ topic: 'offer-rejected', fromBeginning: false });
+kafkaConsumer.subscribe({ topic: 'password-changed', fromBeginning: false });
 
-actuallySendEmails ? startListeningReal() : startListening();
-
-
-async function startListeningReal() { 
-    await kafkaConsumer.run({
-        eachMessage: async ({ topic, partition, message }) => {
-            const kafkaMessage = message.value.toString();
-            const emailInfo = formatEmail(kafkaMessage);
-
-            (async () => {
-                const info = await transporter.sendMail({
-                    from: `thelen.alexander05@gmail.com`,
-                    to: `${emailInfo.emails.join(', ')}`,
-                    subject: `${emailInfo.subject}`,
-                    text: `${emailInfo.bodyText}`,
-                });
-
-                console.log("Message sent:", info.messageId);
-            })();
-        }
-    });
-}
+startListening();
 
 async function startListening() {
     await kafkaConsumer.run({
         eachMessage: async ({ topic, partition, message }) => {
             const kafkaMessage = message.value.toString();
-            const emailInfo = formatEmail(kafkaMessage);
+            // console.log(`Topic: ${topic}`);
+            // console.log(`Message: ${kafkaMessage}`);
+            const emailInfo = await formatEmails(topic, kafkaMessage);
 
             (async () => {
                 const info = await transporter.sendMail({
@@ -76,42 +51,52 @@ async function startListening() {
     });
 }
 
-function formatEmail(kafkaMessage) {
+async function formatEmails(topic, kafkaMessage) {
+    if (topic == "password-changed"){
+        return await formatPasswordEmail(kafkaMessage);
+    } else {
+        return await formatOfferEmail(topic, kafkaMessage);
+    }
+}
+
+async function formatPasswordEmail(kafkaMessage) {
+    const user = await DAL.getUserById(kafkaMessage);
     let response = {
-        subject : kafkaMessage.split('-')[0].trim(),
-        emails : [],
-        gameRequested : kafkaMessage.match(`GameRequested:([^,]+)`)[1] ??= "none",
-        gameOffered : kafkaMessage.match(`GameOffered:([^,]+)`)[1] ??= "none",
+        subject: "Password Updated",
+        emails: [user.email],
+        bodyText: "Your password for the VideoGame Exchange has been updated. If this wasn't you, please contact support at fakeemail@gameexchange.com"
     }
-
-    const emails = kafkaMessage.matchAll(`Email:([^,]+)`);
-    for (const emailMatch of emails) {
-        response.emails.push(emailMatch[1].trim());
-    }
-
-    switch (response.subject) {
-        case "Password Updated":
-            response.bodyText = "Your password for the VideoGame Exchange has been updated. If this wasn't you, please contact support at fakeemail@gameexchange.com";
-            break;
-        case "Offer Accepted":
-            response.bodyText = `Your offer has been accepted. The owners for ${response.gameRequested} and ${response.gameOffered} have been swapped.`;
-            break;
-        case "Offer Rejected":
-            response.bodyText = `Your offer has been rejected. The owners for ${response.gameRequested} and ${response.gameOffered} stay the same.`;
-            break;
-        case "Offer Created":
-            response.bodyText = `A new offer has been created. ${response.gameOffered} has been offered in exchange for ${response.gameRequested}`;
-            break;
-        default:
-            response.bodyText = "You have a notification from the video game exchange system.";
-            break;
-    }
-
     return response;
 }
 
-// Possible Kafka messages:
-// Password Updated- Email:${user.email}
-// Offer Accepted- RequestedEmail:${requestedOwner.email}, OffererEmail:${offeredOwner.email}, GameRequested:${gameRequested.title}, GameOffered:${gameOffered.title}
-// Offer Rejected- RequestedEmail:${requestedOwner.email}, OffererEmail:${offeredOwner.email}, GameRequested:${gameRequested.name}, GameOffered:${gameOffered.name}
-// Offer Created- RequestedEmail:${requestedOwner.email}, OffererEmail:${offeredOwner.email}, GameRequested:${requestedGame.name}, GameOffered:${offeredGame.name}
+async function formatOfferEmail(topic, kafkaMessage) {
+    const offer = await DAL.getOfferById(kafkaMessage);
+    const requestedOwner = await DAL.getUserById(offer.requestedOwner);
+    const offeredOwner = await DAL.getUserById(offer.offeredOwner);
+
+    const requestedGame = await DAL.getGameById(offer.gameRequested);
+    const offeredGame = await DAL.getGameById(offer.gameOffered);
+
+    let response = {
+        emails: [requestedOwner.email, offeredOwner.email],
+    }
+    switch (topic) {
+        case "offer-created":
+            response.subject = "Offer Created";
+            response.bodyText = `A new offer has been created. ${offeredGame.name} has been offered in exchange for ${requestedGame.name}`;
+            break;
+        case "offer-accepted":
+            response.subject = "Offer Accepted";
+            response.bodyText = `Your offer has been accepted. The owners for ${offeredGame.name} and ${requestedGame.name} have been swapped.`;
+            break;
+        case "offer-rejected":
+            response.subject = "Offer Rejected";
+            response.bodyText = `Your offer has been rejected. The owners for ${offeredGame.name} and ${requestedGame.name} stay the same.`;
+            break;
+        default:
+            response.subject = "Unknown Subject";
+            response.bodyText = "This email isn't supposed to be sent... Please contact support at fakeemail@gameexchange.com";
+            break;
+    }
+    return response;
+}

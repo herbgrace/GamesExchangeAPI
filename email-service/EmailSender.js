@@ -22,20 +22,22 @@ const kafka = new Kafka({
 });
 const kafkaConsumer = kafka.consumer({ groupId: 'email-notification-consumers' });
 kafkaConsumer.connect().then(() => console.log('Email Service Kafka Consumer connected'));
-kafkaConsumer.subscribe({ topic: 'offer-created', fromBeginning: false });
-kafkaConsumer.subscribe({ topic: 'offer-accepted', fromBeginning: false });
-kafkaConsumer.subscribe({ topic: 'offer-rejected', fromBeginning: false });
-kafkaConsumer.subscribe({ topic: 'password-changed', fromBeginning: false });
+// TODO: Reformat Kafka Topics again
+// Topic as Users, Offers, Games
+// Key as Created, Updated, Rejected
+// Value as the ID
+kafkaConsumer.subscribe({ topics: ['Offers', 'Users'], fromBeginning: false });
 
 startListening();
 
 async function startListening() {
     await kafkaConsumer.run({
         eachMessage: async ({ topic, partition, message }) => {
+            const kafkaKey = message.key.toString();
             const kafkaMessage = message.value.toString();
             // console.log(`Topic: ${topic}`);
             // console.log(`Message: ${kafkaMessage}`);
-            const emailInfo = await formatEmails(topic, kafkaMessage);
+            const emailInfo = await formatEmails(topic, kafkaKey, kafkaMessage);
 
             (async () => {
                 const info = await transporter.sendMail({
@@ -51,11 +53,11 @@ async function startListening() {
     });
 }
 
-async function formatEmails(topic, kafkaMessage) {
-    if (topic == "password-changed"){
+async function formatEmails(topic, kafkaKey, kafkaMessage) {
+    if (topic == "Users"){
         return await formatPasswordEmail(kafkaMessage);
     } else {
-        return await formatOfferEmail(topic, kafkaMessage);
+        return await formatOfferEmail(topic, kafkaKey, kafkaMessage);
     }
 }
 
@@ -69,7 +71,7 @@ async function formatPasswordEmail(kafkaMessage) {
     return response;
 }
 
-async function formatOfferEmail(topic, kafkaMessage) {
+async function formatOfferEmail(topic, kafkaKey, kafkaMessage) {
     const offer = await DAL.getOfferById(kafkaMessage);
     const requestedOwner = await DAL.getUserById(offer.requestedOwner);
     const offeredOwner = await DAL.getUserById(offer.offeredOwner);
@@ -80,16 +82,16 @@ async function formatOfferEmail(topic, kafkaMessage) {
     let response = {
         emails: [requestedOwner.email, offeredOwner.email],
     }
-    switch (topic) {
-        case "offer-created":
+    switch (kafkaKey) {
+        case "created":
             response.subject = "Offer Created";
             response.bodyText = `A new offer has been created. ${offeredGame.name} has been offered in exchange for ${requestedGame.name}`;
             break;
-        case "offer-accepted":
+        case "accepted":
             response.subject = "Offer Accepted";
             response.bodyText = `Your offer has been accepted. The owners for ${offeredGame.name} and ${requestedGame.name} have been swapped.`;
             break;
-        case "offer-rejected":
+        case "rejected":
             response.subject = "Offer Rejected";
             response.bodyText = `Your offer has been rejected. The owners for ${offeredGame.name} and ${requestedGame.name} stay the same.`;
             break;

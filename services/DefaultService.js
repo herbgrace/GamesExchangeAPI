@@ -268,9 +268,10 @@ const usersIdPATCH = ({ id, body }) => new Promise(
       console.log(user);
 
       kafkaClient.send({
-        topic: 'password-changed',
+        topic: 'Users',
         messages: [
-          { value: `${user.id}` },
+          { key: "updated",
+            value: `${user.id}` },
         ],
       });
       resolve(Service.successResponse(user));
@@ -299,9 +300,10 @@ const usersIdPUT = ({ id, body }) => new Promise(
       console.log(user);
 
       kafkaClient.send({
-        topic: 'password-changed',
+        topic: 'Users',
         messages: [
-          { value: `${user.id}}` },
+          { key: "updated",
+            value: `${user.id}}` },
         ],
       });
       resolve(Service.successResponse(user));
@@ -385,9 +387,10 @@ const offersIdPATCH = ({ id, body }) => new Promise(
         console.log(offer);
 
         kafkaClient.send({
-          topic: 'offer-accepted',
+          topic: 'Offers',
           messages: [
-            { value: `${id}` },
+            { key: "accepted",
+              value: `${id}` },
           ],
         });
         resolve(Service.successResponse(offer));
@@ -399,9 +402,10 @@ const offersIdPATCH = ({ id, body }) => new Promise(
         console.log(offer);
 
         kafkaClient.send({
-          topic: 'offer-rejected',
+          topic: 'Offers',
           messages: [
-            { value: `${id}` },
+            { key: "rejected",
+              value: `${id}` },
           ],
         });
         resolve(Service.successResponse(offer));
@@ -441,9 +445,10 @@ const offersCreatePOST = ({ body }) => new Promise(
       console.log(offer);
 
       kafkaClient.send({
-        topic: 'offer-created',
+        topic: 'Offers',
         messages: [
-          { value: `${offer.id}` },
+          { key: "created",
+            value: `${offer.id}` },
         ],
       });
       resolve({

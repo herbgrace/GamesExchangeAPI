@@ -15,7 +15,6 @@ const kafka = new Kafka({
     clientId: 'email-service',
     brokers: [`${process.env.KAFKA_HOST || "kafka-broker"}:${process.env.KAFKA_PORT || "9092"}`],
     retry: {
-
         initialRetryTime: 5000,
         retries: 10
     }
@@ -57,7 +56,7 @@ async function formatEmails(topic, kafkaKey, kafkaMessage) {
     if (topic == "Users"){
         return await formatPasswordEmail(kafkaMessage);
     } else {
-        return await formatOfferEmail(topic, kafkaKey, kafkaMessage);
+        return await formatOfferEmail(kafkaKey, kafkaMessage);
     }
 }
 
@@ -71,7 +70,7 @@ async function formatPasswordEmail(kafkaMessage) {
     return response;
 }
 
-async function formatOfferEmail(topic, kafkaKey, kafkaMessage) {
+async function formatOfferEmail(kafkaKey, kafkaMessage) {
     const offer = await DAL.getOfferById(kafkaMessage);
     const requestedOwner = await DAL.getUserById(offer.requestedOwner);
     const offeredOwner = await DAL.getUserById(offer.offeredOwner);

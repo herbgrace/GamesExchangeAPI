@@ -25,7 +25,7 @@ services:
       - KAFKA_HOST=kafka-broker
       - KAFKA_PORT=9092
     build:
-      context: .
+      context: ./exchange-api
     depends_on:
       - db
       - kafka

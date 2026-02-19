@@ -1,6 +1,6 @@
-node_modules
-error.log
-combined.log
-kafka
-email-service/node_modules
-email-service/credentials.env
+/exchange-api/node_modules
+/exchange-api/error.log
+/exchange-api/combined.log
+/kafka
+/email-service/node_modules
+/email-service/credentials.env

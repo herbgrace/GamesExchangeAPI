@@ -46,3 +46,7 @@ INSERT INTO Games (`name`, publisher, releaseYear, releaseSystem, `condition`, p
 
 INSERT INTO Offers (gameRequested, requestedOwner, gameOffered, offeredOwner) VALUES
 (1, 1, 2, 2);
+
+CREATE USER 'mysqld_exporter'@'%' IDENTIFIED BY 'dev123' WITH MAX_USER_CONNECTIONS 3;
+GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'mysqld_exporter'@'%';
+FLUSH PRIVILEGES;

@@ -19,11 +19,18 @@ scrape_configs:
       - targets: ['DBExporter:9104']
         labels:
           group: 'mysql'
+  
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['KafkaExporter:9308']
+        labels:
+          group: 'kafka'
+
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['NginxExporter:TBD']
+        labels:
+          group: 'nginx'
 
   # - job_name: 'email-service'
   # - job_name: 'nginx'
-  # - job_name: 'kafka'
-  #   static_configs:
-  #     - targets: ['kafka-broker:9092']
-  #       labels:
-  #         group: 'kafka'

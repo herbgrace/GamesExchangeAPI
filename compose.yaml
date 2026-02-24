@@ -17,14 +17,11 @@ services:
   db-exporter:
     image: prom/mysqld-exporter:latest
     container_name: DBExporter
-    # environment:
-    #   - DATA_SOURCE_NAME=mysqld_exporter:dev123@(VideoGameDB:3306)/
     ports:
       - "9104:9104"
     volumes:
       - ./SQL/config.my-cnf:/cfg/config.my-cnf
     command:
-      # - "--mysqld.username=mysqld_exporter:dev123"
       - "--config.my-cnf=/cfg/config.my-cnf"
     depends_on:
       - db
@@ -97,6 +94,22 @@ services:
 # I caved and used Gemini to help me figure it out since documentation/tinkering can only get me so far apparently.
 # It was all because of the KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR variable being missing...
 
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:latest
+    container_name: KafkaExporter
+    ports:
+      - "9308:9308"
+    # environment:
+    #   - KAFKA_BROKERS=kafka-broker:9092
+    #   - KAFKA_EXPORTER_GROUPS=exchange-api
+    command: ["--kafka.server=kafka-broker:9092"]
+    restart: 
+      on-failure
+    depends_on:
+      - kafka
+    networks:
+      - distributed_network
+
   email-service:
     build:
       context: ./email-service
@@ -104,6 +117,8 @@ services:
     environment:
       - KAFKA_HOST=kafka-broker
       - KAFKA_PORT=9092
+    restart:
+      on-failure
     depends_on:
       - kafka
       - api

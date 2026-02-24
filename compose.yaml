@@ -63,6 +63,19 @@ services:
     networks:
       - distributed_network
 
+  nginx-exporter:
+    container_name: NginxExporter
+    image: nginx/nginx-prometheus-exporter:latest
+    ports:
+      - "9113:9113"
+    environment:
+      - NGINX_STATUS_URL=http://nginx:80/stub_status
+    command: ["-nginx.scrape-uri=http://nginx:80/stub_status"]
+    depends_on:
+      - nginx
+    networks:
+      - distributed_network
+
   kafka:
     image: apache/kafka:latest
     container_name: kafka-broker

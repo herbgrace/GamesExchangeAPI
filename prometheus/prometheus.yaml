@@ -28,9 +28,8 @@ scrape_configs:
 
   - job_name: 'nginx'
     static_configs:
-      - targets: ['NginxExporter:TBD']
+      - targets: ['NginxExporter:9113']
         labels:
           group: 'nginx'
 
   # - job_name: 'email-service'
-  # - job_name: 'nginx'

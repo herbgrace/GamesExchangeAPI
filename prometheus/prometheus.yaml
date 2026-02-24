@@ -32,4 +32,8 @@ scrape_configs:
         labels:
           group: 'nginx'
 
-  # - job_name: 'email-service'
+  - job_name: 'email-service'
+    static_configs:
+      - targets: ['EmailService:7001']
+        labels:
+          group: 'email-service'

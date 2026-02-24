@@ -1,5 +1,10 @@
 const { DAL } = require("./DAL")
+const express = require("express");
+const app = express();
+const {collectDefaultMetrics, register} = require('prom-client');
+const METRICS_PORT = 7001;
 const nodemailer = require('nodemailer');
+
 const transporter = nodemailer.createTransport({
     host: "smtp.ethereal.email",
     port: 587,
@@ -21,13 +26,23 @@ const kafka = new Kafka({
 });
 const kafkaConsumer = kafka.consumer({ groupId: 'email-notification-consumers' });
 kafkaConsumer.connect().then(() => console.log('Email Service Kafka Consumer connected'));
-// TODO: Reformat Kafka Topics again
-// Topic as Users, Offers, Games
-// Key as Created, Updated, Rejected
-// Value as the ID
 kafkaConsumer.subscribe({ topics: ['Offers', 'Users'], fromBeginning: false });
 
 startListening();
+collectDefaultMetrics();
+
+app.get('/metrics', async (req, res) => {
+    try {
+        res.set('Content-Type', register.contentType);
+        res.end(await register.metrics());
+    } catch (err) {
+        res.status(500).end(err);
+    }
+});
+
+app.listen(`${METRICS_PORT}`, (req, res) => {
+    console.log(`Email Service is listening on port ${METRICS_PORT}`);
+});
 
 async function startListening() {
     await kafkaConsumer.run({

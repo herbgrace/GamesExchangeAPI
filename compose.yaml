@@ -13,7 +13,6 @@ services:
     networks:
       - distributed_network
 
-# TODO - runs successfully but doesn't connect to the DB
   db-exporter:
     image: prom/mysqld-exporter:latest
     container_name: DBExporter
@@ -112,9 +111,6 @@ services:
     container_name: KafkaExporter
     ports:
       - "9308:9308"
-    # environment:
-    #   - KAFKA_BROKERS=kafka-broker:9092
-    #   - KAFKA_EXPORTER_GROUPS=exchange-api
     command: ["--kafka.server=kafka-broker:9092"]
     restart: 
       on-failure

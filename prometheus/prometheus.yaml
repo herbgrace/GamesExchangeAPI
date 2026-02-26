@@ -13,6 +13,11 @@ scrape_configs:
       - targets: ['videogameexchange-api-1:7156', 'videogameexchange-api-2:7156']
         labels:
           group: 'exchange-api'
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: '(.*)'
+        target_label: __name__
+        replacement: 'api_${1}'
 
   - job_name: 'mysql'
     static_configs:

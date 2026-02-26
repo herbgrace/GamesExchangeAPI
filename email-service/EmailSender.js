@@ -28,9 +28,11 @@ const kafkaConsumer = kafka.consumer({ groupId: 'email-notification-consumers' }
 kafkaConsumer.connect().then(() => console.log('Email Service Kafka Consumer connected'));
 kafkaConsumer.subscribe({ topics: ['Offers', 'Users'], fromBeginning: false });
 
-startListening();
 collectDefaultMetrics();
+startListening();
 
+// This endpoint method was made using the help of Prometheus' documentation:
+// https://grafana.com/docs/grafana-cloud/monitor-infrastructure/integrations/integration-reference/integration-nodejs/
 app.get('/metrics', async (req, res) => {
     try {
         res.set('Content-Type', register.contentType);

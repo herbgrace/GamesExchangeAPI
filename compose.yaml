@@ -123,8 +123,8 @@ services:
     build:
       context: ./email-service
     container_name: EmailService
-    ports:
-      - "7001:7001"
+    # ports:
+    #   - "7001:7001"
     environment:
       - KAFKA_HOST=kafka-broker
       - KAFKA_PORT=9092

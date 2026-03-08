@@ -2,9 +2,18 @@ apiVersion: 1
 
 providers:
   - name: Prometheus # A uniquely identifiable name for the provider
-    folder: Services # The folder where to place the dashboards
+    folder: Metrics # The folder where to place the dashboards
     type: file
     options:
-      path: /etc/grafana/provisioning/dashboards
+      path: /etc/grafana/provisioning/dashboards/Prometheus
     updateIntervalSeconds: 10
     allowUiUpdates: false
+
+  - name: Elasticsearch
+    folder: Logs
+    type: file
+    options:
+      path: /etc/grafana/provisioning/dashboards/Logging
+    updateIntervalSeconds: 5
+    allowUiUpdates: false
+    disableDeletion: true

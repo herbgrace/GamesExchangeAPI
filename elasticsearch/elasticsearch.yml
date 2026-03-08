@@ -1,0 +1,7 @@
+xpack.security.enabled: false
+xpack.security.enrollment.enabled: false
+xpack.security.http.ssl.enabled: false
+network.host: 0.0.0.0
+
+# The specific config file was created with the help of VSC's copilot
+# After trying for hours, it only added the network.host config.... and it works now...

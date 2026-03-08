@@ -43,7 +43,7 @@ app.get('/metrics', async (req, res) => {
 });
 
 app.listen(`${METRICS_PORT}`, (req, res) => {
-    console.log(`Email Service is listening on port ${METRICS_PORT}`);
+    // console.log(`Email Service is listening on port ${METRICS_PORT}`);
 });
 
 async function startListening() {
@@ -63,7 +63,7 @@ async function startListening() {
                     text: `${emailInfo.bodyText}`,
                 });
 
-                console.log("Message sent:", info.messageId);
+                // console.log("Message sent:", info.messageId);
             })();
         }
     });

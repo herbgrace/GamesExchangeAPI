@@ -8,11 +8,13 @@ const kafka = new Kafka({
   brokers: [`${process.env.KAFKA_HOST || "kafka-broker"}:${process.env.KAFKA_PORT || "9092"}`]
 });
 const kafkaClient = kafka.producer();
-kafkaClient.connect().then(() => {
-  console.log("Kafka client connected");
-}).catch((error) => {
-  console.error("Error connecting Kafka client:", error);
-}); 
+kafkaClient.connect();
+// .then(() => {
+  // console.log("Kafka client connected");
+// })
+// .catch((error) => {
+//   console.error("Error connecting Kafka client:", error);
+// }); 
 
 const BASE_URI = 'http://localhost:8080';
 
@@ -29,7 +31,7 @@ const gamesGET = () => new Promise(
         game.previousOwner = game.previousOwner ? `${BASE_URI}/users/${game.previousOwner}` : "None";
         game.URI = `${BASE_URI}/games/${game.id}`;
       }
-      console.log(games);
+      // console.log(games);
       resolve(Service.successResponse(games));
     } catch (e) {
       console.error(e);
@@ -50,7 +52,7 @@ const gamesIdDELETE = ({ id }) => new Promise(
   async (resolve, reject) => {
     try {
       const result = await DAL.deleteGameById(id);
-      console.log(result);
+      // console.log(result);
       resolve({
         code: 204,
         payload: result
@@ -75,7 +77,7 @@ const gamesIdGET = ({ id }) => new Promise(
     try {
       const game = await DAL.getGameById(id);
       game.previousOwner = game.previousOwner ? `${BASE_URI}/users/${game.previousOwner}` : "None";
-      console.log(game);
+      // console.log(game);
       resolve(Service.successResponse(game));
     } catch (e) {
       console.error(e);
@@ -99,7 +101,7 @@ const gamesIdPATCH = ({ id, body }) => new Promise(
       const game = await DAL.partiallyUpdateGame(id, body);
       game.previousOwner = game.previousOwner ? `${BASE_URI}/users/${game.previousOwner}` : "None";
       game.newURI = `${BASE_URI}/games/${game.id}`;
-      console.log(game);
+      // console.log(game);
       resolve(Service.successResponse(game));
     } catch (e) {
       console.error(e);
@@ -123,7 +125,7 @@ const gamesIdPUT = ({ id, body }) => new Promise(
       const game = await DAL.fullyUpdateGame(id, body);
       game.previousOwner = game.previousOwner ? `${BASE_URI}/users/${game.previousOwner}` : "None";
       game.newURI = `${BASE_URI}/games/${game.id}`;
-      console.log(game);
+      // console.log(game);
       resolve(Service.successResponse(game));
     } catch (e) {
       console.error(e);
@@ -145,7 +147,7 @@ const gamesNameGET = ({ name }) => new Promise(
     try {
       const game = await DAL.getGameByName(name);
       game.previousOwner = game.previousOwner ? `${BASE_URI}/users/${game.previousOwner}` : "None";
-      console.log(game);
+      // console.log(game);
       resolve(Service.successResponse(game));
     } catch (e) {
       console.error(e);
@@ -168,7 +170,7 @@ const gamesPOST = ({ body }) => new Promise(
       const game = await DAL.addNewGame(body);
       game.previousOwner = game.previousOwner ? `${BASE_URI}/users/${game.previousOwner}` : "None";
       game.URI = `${BASE_URI}/games/${game.id}`;
-      console.log(game);
+      // console.log(game);
       resolve({
         code: 201,
         payload: game
@@ -195,7 +197,7 @@ const usersGET = () => new Promise(
         delete user.password;
         user.URI = `${BASE_URI}/users/${user.id}`;
       }
-      console.log(users);
+      // console.log(users);
       resolve(Service.successResponse(users));
     } catch (e) {
       console.error(e);
@@ -217,7 +219,7 @@ const usersIdGET = ({ id }) => new Promise(
     try {
       const user = await DAL.getUserById(id);
       delete user.password;
-      console.log(user);
+      // console.log(user);
       resolve(Service.successResponse(user));
     } catch (e) {
       console.error(e);
@@ -238,7 +240,7 @@ const usersIdDELETE = ({ id }) => new Promise(
   async (resolve, reject) => {
     try {
       const result = await DAL.deleteUser(id);
-      console.log(result);
+      // console.log(result);
       resolve({
         code: 204,
         payload: result
@@ -265,7 +267,7 @@ const usersIdPATCH = ({ id, body }) => new Promise(
       const user = await DAL.partiallyUpdateUser(id, body);
       delete user.password;
       user.newURI = `${BASE_URI}/users/${user.id}`;
-      console.log(user);
+      // console.log(user);
 
       kafkaClient.send({
         topic: 'Users',
@@ -297,7 +299,7 @@ const usersIdPUT = ({ id, body }) => new Promise(
       const user = await DAL.fullyUpdateUser(id, body);
       delete user.password;
       user.newURI = `${BASE_URI}/users/${user.id}`;
-      console.log(user);
+      // console.log(user);
 
       kafkaClient.send({
         topic: 'Users',
@@ -328,7 +330,7 @@ const usersPOST = ({ body }) => new Promise(
       const user = await DAL.addNewUser(body);
       delete user.password;
       user.URI = `${BASE_URI}/users/${user.id}`;
-      console.log(user);
+      // console.log(user);
       resolve({
         code: 201,
         payload: user
@@ -354,7 +356,7 @@ const offersIdGET = ({ id }) => new Promise(
       let offer = await DAL.getOfferById(id);
     
       offer = formatOffer(offer);
-      console.log(offer);
+      // console.log(offer);
       resolve(Service.successResponse(offer));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -384,7 +386,7 @@ const offersIdPATCH = ({ id, body }) => new Promise(
         await DAL.partiallyUpdateGame(gameOffered.id, { previousOwner: gameRequested.previousOwner });
 
         offer = formatOffer(offer);
-        console.log(offer);
+        // console.log(offer);
 
         kafkaClient.send({
           topic: 'Offers',
@@ -399,7 +401,7 @@ const offersIdPATCH = ({ id, body }) => new Promise(
         let offer = await DAL.updateOffer(id, body);
 
         offer = formatOffer(offer);
-        console.log(offer);
+        // console.log(offer);
 
         kafkaClient.send({
           topic: 'Offers',
@@ -442,7 +444,7 @@ const offersCreatePOST = ({ body }) => new Promise(
       
       offer = formatOffer(offer);
       offer.URI = `${BASE_URI}/offers/${offer.id}`;
-      console.log(offer);
+      // console.log(offer);
 
       kafkaClient.send({
         topic: 'Offers',

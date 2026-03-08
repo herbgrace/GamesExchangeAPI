@@ -5,3 +5,13 @@ datasources:
   url: http://prometheus:9090
   access: proxy
   isDefault: true
+
+- name: Elasticsearch
+  type: elasticsearch
+  url: http://elasticsearch:9200
+  access: proxy
+  jsonData:
+    esVersion: 7.0.0
+    timeField: "@timestamp"
+    logmessageField: "full_message"
+    tlsSkipVerify: true
